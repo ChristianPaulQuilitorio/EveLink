@@ -1,6 +1,16 @@
 {
+  "buildCommand": "npm install && npm run build && composer install",
+  "outputDirectory": "public",
   "framework": "laravel",
-  "buildCommand": "composer install && npm install && npm run build",
-  "devCommand": "npm run dev",
-  "outputDirectory": "public"
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.6.1"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.php"
+    }
+  ]
 }
