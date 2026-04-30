@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "public",
+  "buildCommand": "npm install && npm run build && rm -rf dist && mkdir -p dist && cp -R public/. dist/",
+  "outputDirectory": "dist",
   "framework": "laravel",
   "functions": {
     "api/index.php": {
