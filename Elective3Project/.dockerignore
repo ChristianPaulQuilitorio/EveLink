@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env.example
+README.md
+*.md
+node_modules
+vendor
+.editorconfig
+.styleci.yml
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+bootstrap/cache
+.phpunit.result.cache
+tests

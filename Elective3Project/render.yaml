@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: evelink
+    runtime: docker
+    region: oregon
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: SUPABASE_URL
+        fromDatabase:
+          name: supabase
+          property: supabaseUrl
+      - key: SUPABASE_ANON_KEY
+        fromDatabase:
+          name: supabase
+          property: supabaseAnonKey
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromDatabase:
+          name: supabase
+          property: supabaseServiceRoleKey
+      - key: APP_URL
+        fromService:
+          type: web
+          name: evelink
+          property: url
