@@ -17,9 +17,12 @@ class RegistrationController extends Controller
         $selectedEventId = (int) $request->query('event_id');
         $search = $request->string('q')->toString();
         $eventSearch = $request->string('event_search')->toString();
+        $today = now()->toDateString();
 
         $eventsQuery = Event::query()
             ->withCount('registrations')
+            ->whereDate('event_date', '>=', $today)
+            ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) < events.max_slots')
             ->orderBy('event_date');
 
         if ($eventSearch !== '') {

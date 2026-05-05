@@ -17,6 +17,8 @@ class AttendanceController extends Controller
         $search = $request->string('q')->toString();
         $status = $request->string('status')->toString();
         $eventSearch = $request->string('event_search')->toString();
+        $eventStatus = $request->string('event_status')->toString();
+        $today = now()->toDateString();
 
         $eventsQuery = Event::query()
             ->withCount('registrations')
@@ -27,6 +29,22 @@ class AttendanceController extends Controller
                 $query->where('event_name', 'like', '%' . $eventSearch . '%')
                     ->orWhere('venue', 'like', '%' . $eventSearch . '%');
             });
+        }
+
+        if ($eventStatus !== '') {
+            if (strcasecmp($eventStatus, 'Open') === 0) {
+                $eventsQuery
+                    ->whereDate('event_date', '>=', $today)
+                    ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) < events.max_slots');
+            } elseif (strcasecmp($eventStatus, 'Full') === 0) {
+                $eventsQuery
+                    ->whereDate('event_date', '>=', $today)
+                    ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) >= events.max_slots');
+            } elseif (strcasecmp($eventStatus, 'Concluded') === 0) {
+                $eventsQuery->whereDate('event_date', '<', $today);
+            } elseif (strcasecmp($eventStatus, 'Upcoming') === 0) {
+                $eventsQuery->whereDate('event_date', '>=', $today);
+            }
         }
 
         $events = $eventsQuery->get();
@@ -42,6 +60,7 @@ class AttendanceController extends Controller
                 'selectedEvent' => null,
                 'search' => $search,
                 'eventSearch' => $eventSearch,
+                'eventStatus' => $eventStatus,
                 'status' => $status,
                 'registrations' => $registrations,
                 'summary' => ['total' => 0, 'Present' => 0, 'Absent' => 0, 'Pending' => 0],
@@ -254,11 +273,16 @@ class AttendanceController extends Controller
             ->orderBy('first_name');
 
         if ($search !== '') {
-            $registrationsQuery->where(function ($query) use ($search) {
+            $normalizedSearch = mb_strtolower(trim($search));
+            $likeSearch = '%' . $normalizedSearch . '%';
+
+            $registrationsQuery->where(function ($query) use ($search, $likeSearch) {
                 $query->where('first_name', 'like', '%' . $search . '%')
                     ->orWhere('last_name', 'like', '%' . $search . '%')
                     ->orWhere('email', 'like', '%' . $search . '%')
-                    ->orWhere('contact_number', 'like', '%' . $search . '%');
+                    ->orWhere('contact_number', 'like', '%' . $search . '%')
+                    ->orWhereRaw("lower(concat(coalesce(first_name, ''), ' ', coalesce(last_name, ''))) like ?", [$likeSearch])
+                    ->orWhereRaw("lower(concat(coalesce(last_name, ''), ' ', coalesce(first_name, ''))) like ?", [$likeSearch]);
             });
         }
 
@@ -292,6 +316,7 @@ class AttendanceController extends Controller
             'search' => $search,
             'status' => $status,
             'eventSearch' => $eventSearch,
+            'eventStatus' => $eventStatus,
         ]);
     }
 

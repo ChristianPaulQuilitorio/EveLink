@@ -52,7 +52,24 @@
                 <div class="topbar-title">ADMIN COMMAND CENTER</div>
             </div>
             <div class="topbar-right">
-                <span class="topbar-bell" aria-hidden="true">&#128276;</span>
+                <div class="notification-container" id="notificationContainer">
+                    <button type="button" class="topbar-bell" id="notificationBell" aria-label="View notifications">
+                        &#128276;
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-header">
+                            <h3>Notifications</h3>
+                            <div class="notification-header-actions">
+                                <button type="button" class="mark-all-read" id="markAllReadBtn">Mark all as read</button>
+                                <button type="button" class="delete-all-notifications" id="deleteAllNotificationsBtn">Delete all</button>
+                            </div>
+                        </div>
+                        <div class="notification-list" id="notificationList">
+                            <div class="notification-empty">Loading notifications...</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="topbar-user">
                     <strong>{{ auth()->user()->display_name }}</strong>
                     <span>Event Administrator</span>
@@ -141,6 +158,227 @@ if ('serviceWorker' in navigator) {
         searchInput.addEventListener('input', filterOptions);
         filterOptions();
     });
+})();
+
+// Notification System
+(function () {
+    const notificationBell = document.getElementById('notificationBell');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    const notificationBadge = document.getElementById('notificationBadge');
+    const notificationList = document.getElementById('notificationList');
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    const deleteAllNotificationsBtn = document.getElementById('deleteAllNotificationsBtn');
+
+    if (!notificationBell) return;
+
+    const fetchNotifications = async function () {
+        try {
+            const response = await fetch('{{ route("notifications.index") }}', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            const data = await response.json();
+            renderNotifications(data);
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+            notificationList.innerHTML = '<div class="notification-empty">Failed to load notifications</div>';
+        }
+    };
+
+    const renderNotifications = function (data) {
+        const { notifications, unread_count } = data;
+
+        if (unread_count > 0) {
+            notificationBadge.textContent = unread_count;
+            notificationBadge.style.display = 'inline-block';
+        } else {
+            notificationBadge.style.display = 'none';
+        }
+
+        if (notifications.length === 0) {
+            notificationList.innerHTML = '<div class="notification-empty">No notifications</div>';
+            return;
+        }
+
+        notificationList.innerHTML = notifications.map(notif => `
+            <div class="notification-item ${notif.is_read ? 'read' : 'unread'}" data-event-id="${notif.event.id}" data-notification-id="${notif.id}">
+                <div class="notification-content">
+                    <div class="notification-title">${escapeHtml(notif.title)}</div>
+                    <div class="notification-message">${escapeHtml(notif.message)}</div>
+                    <div class="notification-meta">
+                        <span class="event-name">${escapeHtml(notif.event.name)}</span>
+                        <span class="event-date">${escapeHtml(notif.event.date)}</span>
+                    </div>
+                    <div class="notification-time">${escapeHtml(notif.created_at)}</div>
+                </div>
+                <div class="notification-actions">
+                    ${!notif.is_read ? `<button type="button" class="mark-read-btn" data-notification-id="${notif.id}" aria-label="Mark as read">•</button>` : ''}
+                    <button type="button" class="delete-notification-btn" data-notification-id="${notif.id}" aria-label="Delete notification">✕</button>
+                </div>
+            </div>
+        `).join('');
+
+        // Add click handlers to notification items
+        document.querySelectorAll('.notification-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                if (e.target.classList.contains('mark-read-btn') || e.target.classList.contains('delete-notification-btn')) {
+                    return; // Don't navigate if clicking the read button
+                }
+                const eventId = this.dataset.eventId;
+                const notificationId = this.dataset.notificationId;
+                
+                // Mark as read if unread
+                if (this.classList.contains('unread')) {
+                    markNotificationAsRead(notificationId);
+                }
+                
+                // Navigate to registrations page with event selected
+                window.location.href = `{{ route("registrations.index") }}?event_id=${eventId}`;
+            });
+        });
+
+        // Add event listeners to mark as read buttons
+        document.querySelectorAll('.mark-read-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const notificationId = btn.dataset.notificationId;
+                await markNotificationAsRead(notificationId);
+            });
+        });
+
+        document.querySelectorAll('.delete-notification-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const notificationId = btn.dataset.notificationId;
+                await deleteNotification(notificationId);
+            });
+        });
+    };
+
+    const markNotificationAsRead = async function (notificationId) {
+        try {
+            const response = await fetch(`{{ route("notifications.read", ":id") }}`.replace(':id', notificationId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (response.ok) {
+                fetchNotifications();
+            }
+        } catch (error) {
+            console.error('Failed to mark notification as read:', error);
+        }
+    };
+
+    const markAllAsRead = async function () {
+        try {
+            const response = await fetch('{{ route("notifications.read-all") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (response.ok) {
+                fetchNotifications();
+            }
+        } catch (error) {
+            console.error('Failed to mark all as read:', error);
+        }
+    };
+
+    const deleteNotification = async function (notificationId) {
+        try {
+            const response = await fetch(`{{ route("notifications.destroy", ":id") }}`.replace(':id', notificationId), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (response.ok) {
+                fetchNotifications();
+            }
+        } catch (error) {
+            console.error('Failed to delete notification:', error);
+        }
+    };
+
+    const deleteAllNotifications = async function () {
+        try {
+            const response = await fetch('{{ route("notifications.destroy-all") }}', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            });
+
+            if (response.ok) {
+                fetchNotifications();
+            }
+        } catch (error) {
+            console.error('Failed to delete all notifications:', error);
+        }
+    };
+
+    const escapeHtml = function (text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
+    // Toggle dropdown
+    notificationBell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isOpen = notificationDropdown.classList.contains('is-open');
+        if (isOpen) {
+            notificationDropdown.classList.remove('is-open');
+        } else {
+            notificationDropdown.classList.add('is-open');
+            fetchNotifications();
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationDropdown.classList.remove('is-open');
+        }
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    notificationDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+
+    // Mark all as read button
+    markAllReadBtn.addEventListener('click', function () {
+        markAllAsRead();
+    });
+
+    deleteAllNotificationsBtn.addEventListener('click', function () {
+        deleteAllNotifications();
+    });
+
+    // Initial fetch
+    fetchNotifications();
+    // Refresh every 10 seconds
+    setInterval(fetchNotifications, 10000);
 })();
 </script>
 </body>

@@ -42,7 +42,7 @@
             <input type="hidden" name="q" value="{{ $search }}">
             <select name="status" onchange="this.form.submit()">
                 <option value="">All Events</option>
-                @foreach(['Open', 'Upcoming', 'Full', 'Concluded'] as $option)
+                @foreach(['Open', 'Upcoming'] as $option)
                     <option value="{{ $option }}" {{ $status === $option ? 'selected' : '' }}>{{ $option }}</option>
                 @endforeach
             </select>

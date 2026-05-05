@@ -6,6 +6,7 @@ use App\Http\Controllers\AttendeePortalController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,6 +38,12 @@ Route::middleware(['auth', 'role:admin'])->group(function (): void {
 
     Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
     Route::patch('/attendance/{registration}', [AttendanceController::class, 'update'])->name('attendance.update');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::delete('/notifications', [NotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

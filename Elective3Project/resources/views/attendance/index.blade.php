@@ -30,6 +30,15 @@
                         <input type="search" name="event_search" value="{{ $eventSearch ?? '' }}" placeholder="Type event title or venue..." oninput="this.form.submit()">
                     </label>
                     <label class="picker-label-group">
+                        <span class="picker-label">Event Status</span>
+                        <select name="event_status" onchange="this.form.submit()">
+                            <option value="">All Events</option>
+                            @foreach(['Open', 'Full', 'Upcoming', 'Concluded'] as $opt)
+                                <option value="{{ $opt }}" {{ $eventStatus === $opt ? 'selected' : '' }}>{{ $opt }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="picker-label-group">
                         <span class="picker-label">Event</span>
                         <select name="event_id" onchange="this.form.submit()" {{ $events->isEmpty() ? 'disabled' : '' }}>
                             @forelse($events as $event)

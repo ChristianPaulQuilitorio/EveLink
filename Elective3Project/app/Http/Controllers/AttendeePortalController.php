@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Notification;
 use App\Models\Registration;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,9 +16,16 @@ class AttendeePortalController extends Controller
     {
         $search = $request->string('q')->toString();
         $status = $request->string('status')->toString();
+        $allowedStatuses = ['Open', 'Upcoming'];
+        if (! in_array($status, $allowedStatuses, true)) {
+            $status = '';
+        }
         $today = now()->toDateString();
 
-        $eventsQuery = Event::query()->withCount('registrations');
+        $eventsQuery = Event::query()
+            ->withCount('registrations')
+            ->whereDate('event_date', '>=', $today)
+            ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) < events.max_slots');
 
         if ($search !== '') {
             $eventsQuery->where(function ($query) use ($search) {
@@ -26,25 +35,7 @@ class AttendeePortalController extends Controller
             });
         }
 
-        if (strcasecmp($status, 'Open') === 0) {
-            $eventsQuery
-                ->whereDate('event_date', '>=', $today)
-                ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) < events.max_slots');
-        }
-
-        if (strcasecmp($status, 'Full') === 0) {
-            $eventsQuery
-                ->whereDate('event_date', '>=', $today)
-                ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) >= events.max_slots');
-        }
-
-        if (strcasecmp($status, 'Upcoming') === 0) {
-            $eventsQuery->whereDate('event_date', '>=', $today);
-        }
-
-        if (strcasecmp($status, 'Concluded') === 0) {
-            $eventsQuery->whereDate('event_date', '<', $today);
-        }
+        // The user portal now only surfaces open upcoming events.
 
         $events = $eventsQuery
             ->orderBy('event_date')
@@ -125,6 +116,18 @@ class AttendeePortalController extends Controller
             'contact_number' => $user->contact_number ?: '00000000000',
             'attendance_status' => 'Pending',
         ]);
+
+        // Create notification for all admins
+        $admins = User::query()->where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            Notification::create([
+                'event_id' => $event->id,
+                'user_id' => $admin->id,
+                'type' => 'event_joined',
+                'title' => 'New Registration',
+                'message' => "{$user->full_name} has joined {$event->event_name}",
+            ]);
+        }
 
         return redirect()
             ->route('portal.registrations')
