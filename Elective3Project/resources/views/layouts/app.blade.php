@@ -27,19 +27,19 @@
         </div>
         <nav class="menu">
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <span class="menu-icon" title="Dashboard"><img src="/icons/dashboard.svg" alt="Dashboard" style="width:18px;height:18px;"></span>
+                <span class="menu-icon" title="Dashboard"><img src="{{ asset('icons/dashboard.svg') }}" alt="Dashboard" style="width:18px;height:18px;"></span>
                 <span>Dashboard</span>
             </a>
             <a href="{{ route('events.index') }}" class="{{ request()->routeIs('events.*') ? 'active' : '' }}">
-                <span class="menu-icon" title="Events"><img src="/icons/event.svg" alt="Events" style="width:18px;height:18px;"></span>
+                <span class="menu-icon" title="Events"><img src="{{ asset('icons/event.svg') }}" alt="Events" style="width:18px;height:18px;"></span>
                 <span>Events</span>
             </a>
             <a href="{{ route('registrations.index') }}" class="{{ request()->routeIs('registrations.*') ? 'active' : '' }}">
-                <span class="menu-icon" title="Registrations"><img src="/icons/registrations.svg" alt="Registrations" style="width:18px;height:18px;"></span>
+                <span class="menu-icon" title="Registrations"><img src="{{ asset('icons/registrations.svg') }}" alt="Registrations" style="width:18px;height:18px;"></span>
                 <span>Registrations</span>
             </a>
             <a href="{{ route('attendance.index') }}" class="{{ request()->routeIs('attendance.*') ? 'active' : '' }}">
-                <span class="menu-icon" title="Attendance"><img src="/icons/attendance.svg" alt="Attendance" style="width:18px;height:18px;"></span>
+                <span class="menu-icon" title="Attendance"><img src="{{ asset('icons/attendance.svg') }}" alt="Attendance" style="width:18px;height:18px;"></span>
                 <span>Attendance</span>
             </a>
         </nav>
