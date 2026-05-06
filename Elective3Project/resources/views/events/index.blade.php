@@ -23,7 +23,10 @@
 
     <div class="card">
         <form method="GET" class="filters auto-submit-filters" data-auto-submit-filters>
-            <input type="text" name="q" value="{{ $search }}" placeholder="Search by event title or venue">
+            <label class="search-field">
+                <span class="search-icon">⌕</span>
+                <input type="text" name="q" value="{{ $search }}" placeholder="Search by event title or venue">
+            </label>
             <select name="status">
                 <option value="">All</option>
                 @foreach(['Open', 'Full', 'Concluded'] as $opt)
