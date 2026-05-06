@@ -1,0 +1,67 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#2583f6">
+    <title>EveLink Login</title>
+    <link rel="manifest" href="http://127.0.0.1:8000/manifest.webmanifest">
+            <link rel="stylesheet" href="/css/app.css">
+        <script src="/build/assets/app-CcNNqum8.js" defer></script>
+    </head>
+<body class="auth-body">
+<main class="auth-shell">
+        <div class="auth-grid">
+        <section class="auth-hero">
+            <span class="auth-badge">Admin Portal</span>
+            <div>
+                <h1>EveLink</h1>
+                <p>Manage registrations, track attendance, and export reports from one calm workspace.</p>
+            </div>
+
+            <ul class="auth-feature-list">
+                <li>Unified event operations for admin workflows</li>
+                <li>Fast attendance and registration management</li>
+                <li>XLSX-ready reporting with clean exports</li>
+            </ul>
+        </section>
+
+        <section class="auth-panel">
+            <div class="auth-panel-head">
+                <h2>Welcome back</h2>
+                <p>Sign in to your administrative dashboard.</p>
+            </div>
+
+            
+            <form method="POST" action="http://127.0.0.1:8000/login" class="auth-form form-grid">
+                <input type="hidden" name="_token" value="4v0CxVueHzYhsYJStSRncXorf1ukWRC6FXE2fSG1" autocomplete="off">
+                <label for="login">Email or Username
+                    <input id="login" type="text" name="login" value="" autocomplete="username" placeholder="admin@example.com" required>
+                </label>
+
+                <label for="password">Password
+                    <input id="password" type="password" name="password" autocomplete="current-password" placeholder="Enter your password" required>
+                </label>
+
+                <button class="btn btn-primary" type="submit">Log in</button>
+            </form>
+
+            <div class="auth-portal-link">
+                <span>Looking for the attendee experience?</span>
+                <a href="http://127.0.0.1:8000/portal">Open the EveLink user / attendee portal</a>
+            </div>
+
+            <p class="auth-footnote">EveLink Admin Portal</p>
+        </section>
+    </div>
+</main>
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js');
+    });
+}
+</script>
+</body>
+</html>
+

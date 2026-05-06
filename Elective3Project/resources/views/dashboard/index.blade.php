@@ -28,119 +28,115 @@
         </div>
     </div>
 
-    <div class="cards four dashboard-stats">
-        <div class="card stat plus-hint">
-            <div class="stat-top"><span class="stat-icon">&#128197;</span></div>
-            <span>Total Events</span>
-            <strong>{{ $totalEvents }}</strong>
+    <div class="dashboard-linear">
+        <div class="card welcome-banner">
+            <div>
+                <h3>Welcome back,<br>{{ auth()->user()->display_name }}!</h3>
+                <p>You have <a href="{{ route('events.index') }}">{{ $upcomingEvents }} upcoming events</a> this week.<br>Ready to manage your attendees?</p>
+            </div>
+            <div class="row">
+                <a class="btn btn-primary" href="{{ route('events.index', ['create' => 1]) }}">+ Add New Event</a>
+                <button type="button" class="btn" data-open-dashboard-register-modal>Register Attendee</button>
+            </div>
         </div>
-        <div class="card stat plus-hint">
-            <div class="stat-top"><span class="stat-icon">&#128101;</span></div>
-            <span>Registrations</span>
-            <strong>{{ $totalRegistrations }}</strong>
-        </div>
-        <div class="card stat plus-hint">
-            <div class="stat-top"><span class="stat-icon">&#127942;</span><em>{{ $fullEvents > 0 ? $fullEvents . ' ending soon' : 'No full events' }}</em></div>
-            <span>Full Events</span>
-            <strong>{{ $fullEvents }}</strong>
-        </div>
-        <div class="card stat plus-hint">
-            <div class="stat-top"><span class="stat-icon">&#128339;</span><em>{{ $upcomingEvents > 0 ? 'Next: Tomorrow' : 'No upcoming' }}</em></div>
-            <span>Upcoming</span>
-            <strong>{{ $upcomingEvents }}</strong>
-        </div>
-    </div>
 
-    <div class="dashboard-grid">
-        <section class="dashboard-main">
-            <div class="card welcome-banner">
+        <div class="cards four dashboard-stats">
+            <div class="card stat plus-hint">
+                <div class="stat-top"><span class="stat-icon">&#128197;</span></div>
+                <span>Total Events</span>
+                <strong>{{ $totalEvents }}</strong>
+            </div>
+            <div class="card stat plus-hint">
+                <div class="stat-top"><span class="stat-icon">&#128101;</span></div>
+                <span>Registrations</span>
+                <strong>{{ $totalRegistrations }}</strong>
+            </div>
+            <div class="card stat plus-hint">
+                <div class="stat-top"><span class="stat-icon">&#127942;</span><em>{{ $fullEvents > 0 ? $fullEvents . ' ending soon' : 'No full events' }}</em></div>
+                <span>Full Events</span>
+                <strong>{{ $fullEvents }}</strong>
+            </div>
+            <div class="card stat plus-hint">
+                <div class="stat-top"><span class="stat-icon">&#128339;</span><em>{{ $upcomingEvents > 0 ? 'Next: Tomorrow' : 'No upcoming' }}</em></div>
+                <span>Upcoming</span>
+                <strong>{{ $upcomingEvents }}</strong>
+            </div>
+        </div>
+
+        <div class="card calendar-card">
+            <h3>{{ now()->format('F Y') }}</h3>
+            <div class="calendar-head">
+                @foreach(['S', 'M', 'T', 'W', 'T', 'F', 'S'] as $weekday)
+                    <span>{{ $weekday }}</span>
+                @endforeach
+            </div>
+            <div class="calendar-grid">
+                @foreach($days as $day)
+                    <span class="{{ $day === now()->day ? 'today' : '' }}">{{ $day ?? '' }}</span>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="card recent-registrations-card">
+            <div class="card-head">
                 <div>
-                    <h3>Welcome back,<br>{{ auth()->user()->display_name }}!</h3>
-                    <p>You have <a href="{{ route('events.index') }}">{{ $upcomingEvents }} upcoming events</a> this week.<br>Ready to manage your attendees?</p>
+                    <h3>Recent Registrations</h3>
+                    <p>Latest attendee sign-ups across all events.</p>
                 </div>
-                <div class="row">
-                    <a class="btn btn-primary" href="{{ route('events.index', ['create' => 1]) }}">+ Add New Event</a>
-                    <button type="button" class="btn" data-open-dashboard-register-modal>Register Attendee</button>
-                </div>
+                <a href="{{ route('registrations.index') }}" class="view-all">View All</a>
             </div>
-
-            <div class="card">
-                <div class="card-head">
-                    <div>
-                        <h3>Recent Registrations</h3>
-                        <p>Latest attendee sign-ups across all events.</p>
-                    </div>
-                    <a href="{{ route('registrations.index') }}" class="view-all">View All</a>
-                </div>
-                <div class="table-wrap">
-                    <table class="table">
-                        <thead>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Attendee</th>
+                        <th>Event Name</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse($recentRegistrations as $registration)
                         <tr>
-                            <th>Attendee</th>
-                            <th>Event Name</th>
-                            <th>Time</th>
-                            <th>Status</th>
+                            <td>
+                                <div class="attendee-cell">
+                                    <span class="avatar">{{ strtoupper(substr($registration->first_name, 0, 1) . substr($registration->last_name, 0, 1)) }}</span>
+                                    <span>{{ $registration->full_name }}</span>
+                                </div>
+                            </td>
+                            <td>{{ $registration->event?->event_name }}</td>
+                            <td>{{ $registration->created_at->diffForHumans() }}</td>
+                            <td><span class="badge {{ strtolower($registration->attendance_status) }}">{{ $registration->attendance_status }}</span></td>
                         </tr>
-                        </thead>
-                        <tbody>
-                        @forelse($recentRegistrations as $registration)
-                            <tr>
-                                <td>
-                                    <div class="attendee-cell">
-                                        <span class="avatar">{{ strtoupper(substr($registration->first_name, 0, 1) . substr($registration->last_name, 0, 1)) }}</span>
-                                        <span>{{ $registration->full_name }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ $registration->event?->event_name }}</td>
-                                <td>{{ $registration->created_at->diffForHumans() }}</td>
-                                <td><span class="badge {{ strtolower($registration->attendance_status) }}">{{ $registration->attendance_status }}</span></td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4">No registrations yet.</td>
-                            </tr>
-                        @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <aside class="dashboard-side">
-            <div class="card calendar-card">
-                <h3>{{ now()->format('F Y') }}</h3>
-                <div class="calendar-head">
-                    @foreach(['S', 'M', 'T', 'W', 'T', 'F', 'S'] as $weekday)
-                        <span>{{ $weekday }}</span>
-                    @endforeach
-                </div>
-                <div class="calendar-grid">
-                    @foreach($days as $day)
-                        <span class="{{ $day === now()->day ? 'today' : '' }}">{{ $day ?? '' }}</span>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Upcoming Events</h3>
-                <ul class="upcoming-list">
-                    @forelse($upcomingList as $event)
-                        <li>
-                            <span class="date-chip">
-                                <small>{{ strtoupper($event->event_date->format('M')) }}</small>
-                                <strong>{{ $event->event_date->format('d') }}</strong>
-                            </span>
-                            <div>
-                                <strong>{{ $event->event_name }}</strong>
-                                <p>{{ $event->start_time ?: '09:00 AM' }} · {{ $event->remaining_slots }}/{{ $event->max_slots }}</p>
-                            </div>
-                        </li>
                     @empty
-                        <li class="empty">No upcoming events.</li>
+                        <tr>
+                            <td colspan="4">No registrations yet.</td>
+                        </tr>
                     @endforelse
-                </ul>
+                    </tbody>
+                </table>
             </div>
-        </aside>
+        </div>
+
+        <div class="card upcoming-events-card">
+            <h3>Upcoming Events</h3>
+            <ul class="upcoming-list">
+                @forelse($upcomingList as $event)
+                    <li>
+                        <span class="date-chip">
+                            <small>{{ strtoupper($event->event_date->format('M')) }}</small>
+                            <strong>{{ $event->event_date->format('d') }}</strong>
+                        </span>
+                        <div>
+                            <strong>{{ $event->event_name }}</strong>
+                            <p>{{ $event->start_time ?: '09:00 AM' }} · {{ $event->remaining_slots }}/{{ $event->max_slots }}</p>
+                        </div>
+                    </li>
+                @empty
+                    <li class="empty">No upcoming events.</li>
+                @endforelse
+            </ul>
+        </div>
     </div>
 
     <div class="modal-overlay dashboard-register-modal {{ $showDashboardRegisterModal ? 'is-open' : '' }}" id="dashboardRegisterModal">

@@ -3990,7 +3990,63 @@ select::-ms-expand {
     }
 
     @media (max-width: 420px) {
-        .topbar { padding: 0 12px; height: 64px; }
+        .topbar {
+            padding: 10px 12px;
+            height: auto;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .topbar-left {
+            width: 100%;
+            justify-content: flex-start;
+            min-width: 0;
+        }
+
+        .topbar-title {
+            flex: 1;
+            min-width: 0;
+            white-space: normal;
+            line-height: 1.25;
+        }
+
+        .topbar-right {
+            width: 100%;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .notification-container {
+            flex: 1 1 auto;
+            display: flex;
+            justify-content: flex-end;
+            min-width: 0;
+        }
+
+        .notification-dropdown {
+            right: 0;
+            left: 0;
+            width: calc(100vw - 24px);
+            max-width: calc(100vw - 24px);
+        }
+
+        .notification-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .notification-header-actions {
+            width: 100%;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .topbar-user {
+            text-align: left;
+        }
+
         .page-header h1 { font-size: 28px; }
         .brand-copy strong:first-child { font-size: 15px; }
         .brand-copy strong:last-child { display: none; }
