@@ -25,9 +25,9 @@
         <form method="GET" class="filters auto-submit-filters" data-auto-submit-filters>
             <label class="search-field">
                 <span class="search-icon">⌕</span>
-                <input type="text" name="q" value="{{ $search }}" placeholder="Search by event title or venue">
+                <input type="text" name="q" value="{{ $search }}" placeholder="Search by event title or venue" oninput="this.form.submit()">
             </label>
-            <select name="status">
+            <select name="status" onchange="this.form.submit()">
                 <option value="">All</option>
                 @foreach(['Open', 'Full', 'Concluded'] as $opt)
                     <option value="{{ $opt }}" {{ $status === $opt ? 'selected' : '' }}>{{ $opt }}</option>
@@ -358,3 +358,4 @@
         })();
     </script>
 @endsection
+
