@@ -88,6 +88,15 @@ body {
     flex-direction: column;
 }
 
+/* Responsive container constraints to avoid overly wide content */
+.main {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 16px;
+}
+
 .topbar {
     height: 72px;
     padding: 0 24px;
@@ -195,11 +204,12 @@ body {
 }
 
 .cards.four {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    align-items: stretch;
 }
 
 .cards.two {
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .dashboard-stats .stat {
@@ -235,7 +245,7 @@ body {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 2fr 0.95fr;
+    grid-template-columns: 1fr 0.95fr;
     gap: 14px;
 }
 
@@ -3944,7 +3954,7 @@ select::-ms-expand {
         .welcome-banner .row { width: 100%; gap: 8px; }
         .welcome-banner .btn, .welcome-banner button {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 12px;
             min-height: 44px;
             font-size: 15px;
         }
@@ -3959,6 +3969,24 @@ select::-ms-expand {
         .stat strong { font-size: 20px; }
 
         .table td, .table th { padding: 10px 6px; }
+    }
+
+    /* Small-screen fixes to prevent horizontal overflow */
+    @media (max-width: 480px) {
+        html, body { overflow-x: hidden; }
+
+        .main { padding: 0 12px; }
+
+        /* allow buttons to shrink and prevent min-width forcing overflow */
+        .btn { min-width: 0; }
+
+        /* specifically ensure welcome action buttons stack and fit */
+        .welcome-banner { padding: 12px; border-radius: 12px; }
+        .welcome-banner .row { display: flex; flex-direction: column; gap: 8px; }
+        .welcome-banner .row .btn { width: 100%; }
+
+        /* reduce card padding to fit narrow screens */
+        .card { padding: 12px; }
     }
 
     @media (max-width: 420px) {
@@ -4006,49 +4034,127 @@ select::-ms-expand {
     .registrations-table td:first-child .avatar { width: 36px; height: 36px; }
 }
 
-/* Strongly stack dashboard cards on narrow screens for readability */
-@media (max-width: 900px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-        grid-auto-flow: row;
+/* Desktop grid layout for reordered dashboard elements */
+@media (min-width: 901px) {
+    .dashboard-linear {
+        display: grid;
+        grid-template-columns: 2fr 0.95fr;
+        grid-template-areas:
+            "welcome welcome"
+            "stats stats"
+            "recent calendar"
+            "recent upcoming";
+        gap: 14px;
     }
 
-    .dashboard-main,
-    .dashboard-side {
-        width: 100%;
-        padding: 0;
-        margin: 0;
-    }
-
-    .cards.four {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .cards.four .card.stat,
-    .cards.four .stat {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 12px;
-    }
-
-    .stat-top { flex-direction: row; gap: 10px; }
-
-    .welcome-banner { padding: 12px; }
-
-    .card { padding: 12px; }
-
-    .table-wrap { overflow: visible; }
+    .dashboard-linear .welcome-banner { grid-area: welcome; }
+    .dashboard-linear .dashboard-stats { grid-area: stats; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .dashboard-linear .recent-registrations-card { grid-area: recent; }
+    .dashboard-linear .calendar-card { grid-area: calendar; }
+    .dashboard-linear .upcoming-events-card { grid-area: upcoming; }
 }
 
-@media (max-width: 540px) {
-    /* Make each stat card visually separated and readable */
-    .cards.four .card.stat { box-shadow: 0 6px 14px rgba(16,27,42,0.06); }
+/* Small screens: linear flow maintained by markup; ensure spacing */
+@media (max-width: 900px) {
+    .dashboard-linear { display: block; }
+    .dashboard-linear .dashboard-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 10px 0; }
+    .dashboard-linear .recent-registrations-card, .dashboard-linear .calendar-card, .dashboard-linear .upcoming-events-card { margin: 10px 0; }
+}
 
-    .welcome-banner h3 { font-size: 18px; }
-    .welcome-banner p { font-size: 13px; }
+/* Ensure cards don't exceed container and have consistent padding */
+.card {
+    width: 100%;
+    box-sizing: border-box;
+}
 
-    .recent-registrations .table tr { padding: 10px; }
+/* Slightly reduce top-level content padding on very small screens */
+@media (max-width: 420px) {
+    .main { padding: 0 10px; }
+    .page-header { padding: 10px 0; }
+}
+
+/* Final mobile override for dashboard width and stacking */
+@media (max-width: 900px) {
+    .dashboard-linear {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .dashboard-linear > .card,
+    .dashboard-linear > .cards,
+    .dashboard-linear > .welcome-banner {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin-bottom: 12px;
+    }
+
+    .dashboard-linear .welcome-banner {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .dashboard-linear .welcome-banner h3 {
+        font-size: 18px;
+        line-height: 1.1;
+        word-break: break-word;
+    }
+
+    .dashboard-linear .welcome-banner p {
+        font-size: 13px;
+        line-height: 1.5;
+        margin-top: 8px;
+        word-break: break-word;
+    }
+
+    .dashboard-linear .welcome-banner .row {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .dashboard-linear .welcome-banner .btn,
+    .dashboard-linear .welcome-banner button {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 12px 14px;
+    }
+
+    .dashboard-linear .dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .dashboard-linear .stat {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dashboard-linear .calendar-card,
+    .dashboard-linear .recent-registrations-card,
+    .dashboard-linear .upcoming-events-card {
+        padding: 14px;
+    }
+
+    .dashboard-linear .calendar-grid,
+    .dashboard-linear .calendar-head {
+        gap: 6px;
+    }
+
+    .dashboard-linear .calendar-grid span {
+        font-size: 13px;
+        line-height: 28px;
+        height: 28px;
+    }
+
+    .dashboard-linear .table-wrap {
+        overflow-x: auto;
+    }
 }
