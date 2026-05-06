@@ -11,17 +11,19 @@ services:
       - key: APP_DEBUG
         value: false
       - key: SUPABASE_URL
-        fromDatabase:
-          name: supabase
-          property: supabaseUrl
+        sync: false
       - key: SUPABASE_ANON_KEY
-        fromDatabase:
-          name: supabase
-          property: supabaseAnonKey
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
-        fromDatabase:
-          name: supabase
-          property: supabaseServiceRoleKey
+        sync: false
+      - key: SUPABASE_DATABASE_URL
+        sync: false
+      - key: SUPABASE_SCHEMA
+        value: public
+      - key: SUPABASE_STORAGE_BUCKET
+        value: event-assets
       - key: APP_URL
         fromService:
           type: web
