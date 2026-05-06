@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#2583f6">
     <title>{{ $title ?? 'EveLink Login' }}</title>
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="auth-body">
 <main class="auth-shell">
