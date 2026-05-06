@@ -141,7 +141,7 @@
                         <tbody>
                         @forelse($registrations as $registration)
                             <tr>
-                                <td>
+                                <td data-label="Participant">
                                     <div class="attendee-cell">
                                         <div class="avatar">
                                             {{ strtoupper(substr($registration->first_name, 0, 1) . substr($registration->last_name, 0, 1)) }}
@@ -152,10 +152,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $registration->email }}</td>
-                                <td>{{ $registration->contact_number }}</td>
-                                <td><span class="badge {{ strtolower($registration->attendance_status) }}">{{ $registration->attendance_status }}</span></td>
-                                <td>
+                                <td data-label="Email">{{ $registration->email }}</td>
+                                <td data-label="Contact">{{ $registration->contact_number }}</td>
+                                <td data-label="Status"><span class="badge {{ strtolower($registration->attendance_status) }}">{{ $registration->attendance_status }}</span></td>
+                                <td data-label="Action">
                                     <div class="actions">
                                         <a href="{{ route('registrations.edit', $registration) }}" class="icon-btn" title="View" aria-label="View registration">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>

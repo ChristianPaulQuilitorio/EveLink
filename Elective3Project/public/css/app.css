@@ -3912,3 +3912,36 @@ select::-ms-expand {
         pointer-events: auto;
     }
 }
+
+/* Make table rows stack into card-like list on small screens for events/registrations */
+@media (max-width: 760px) {
+    .table thead { display: none; }
+    .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+    }
+
+    .table tr {
+        margin: 0 0 12px 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px;
+        background: #fff;
+    }
+
+    .table td {
+        padding: 8px 6px;
+        border: none;
+    }
+
+    .table td:before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        color: var(--muted);
+        margin-bottom: 6px;
+        font-size: 12px;
+    }
+
+    .registrations-table td:first-child .avatar { width: 36px; height: 36px; }
+}

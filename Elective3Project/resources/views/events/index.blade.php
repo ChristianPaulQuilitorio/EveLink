@@ -49,18 +49,18 @@
             <tbody>
             @forelse($events as $event)
                 <tr>
-                    <td>
+                    <td data-label="Event Detail">
                         <strong>{{ $event->event_name }}</strong>
                         <div class="muted">ID: EVT-{{ str_pad((string)$event->id, 4, '0', STR_PAD_LEFT) }}</div>
                     </td>
-                    <td>
+                    <td data-label="Schedule">
                         {{ $event->event_date->format('M d, Y') }}
                         <div class="muted">{{ $event->start_time ?: '--:--' }} - {{ $event->end_time ?: '--:--' }}</div>
                     </td>
-                    <td>{{ $event->venue }}</td>
-                    <td>{{ $event->registered_count }}/{{ $event->max_slots }} <span class="muted">({{ $event->remaining_slots }} left)</span></td>
-                    <td><span class="badge {{ strtolower($event->status) }}">{{ $event->status }}</span></td>
-                    <td class="actions">
+                    <td data-label="Venue">{{ $event->venue }}</td>
+                    <td data-label="Capacity">{{ $event->registered_count }}/{{ $event->max_slots }} <span class="muted">({{ $event->remaining_slots }} left)</span></td>
+                    <td data-label="Status"><span class="badge {{ strtolower($event->status) }}">{{ $event->status }}</span></td>
+                    <td data-label="Action" class="actions">
                         <a href="{{ route('events.show', $event) }}" class="icon-btn" title="View" aria-label="View">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z" stroke="#59677b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="#59677b" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </a>
