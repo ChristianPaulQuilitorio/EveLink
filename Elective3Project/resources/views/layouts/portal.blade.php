@@ -8,7 +8,12 @@
     <title>{{ $title ?? 'EveLink Portal' }}</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(app()->environment('production'))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <link rel="stylesheet" href="/css/app.css">
+        <script src="/build/assets/app-CcNNqum8.js" defer></script>
+    @endif
 </head>
 <body class="portal-body">
 <header class="portal-topbar">

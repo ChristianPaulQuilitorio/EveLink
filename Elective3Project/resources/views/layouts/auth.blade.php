@@ -6,7 +6,12 @@
     <meta name="theme-color" content="#2583f6">
     <title>{{ $title ?? 'EveLink Login' }}</title>
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(app()->environment('production'))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        <link rel="stylesheet" href="/css/app.css">
+        <script src="/build/assets/app-CcNNqum8.js" defer></script>
+    @endif
 </head>
 <body class="auth-body">
 <main class="auth-shell">
