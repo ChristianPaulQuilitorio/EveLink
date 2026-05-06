@@ -4005,3 +4005,50 @@ select::-ms-expand {
 
     .registrations-table td:first-child .avatar { width: 36px; height: 36px; }
 }
+
+/* Strongly stack dashboard cards on narrow screens for readability */
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        grid-auto-flow: row;
+    }
+
+    .dashboard-main,
+    .dashboard-side {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .cards.four {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .cards.four .card.stat,
+    .cards.four .stat {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .stat-top { flex-direction: row; gap: 10px; }
+
+    .welcome-banner { padding: 12px; }
+
+    .card { padding: 12px; }
+
+    .table-wrap { overflow: visible; }
+}
+
+@media (max-width: 540px) {
+    /* Make each stat card visually separated and readable */
+    .cards.four .card.stat { box-shadow: 0 6px 14px rgba(16,27,42,0.06); }
+
+    .welcome-banner h3 { font-size: 18px; }
+    .welcome-banner p { font-size: 13px; }
+
+    .recent-registrations .table tr { padding: 10px; }
+}
