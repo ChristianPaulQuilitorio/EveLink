@@ -64,6 +64,7 @@ class RegistrationController extends Controller
             $query->where(function ($inner) use ($like) {
                 $inner->whereRaw('LOWER(first_name) LIKE ?', [$like])
                     ->orWhereRaw('LOWER(last_name) LIKE ?', [$like])
+                    ->orWhereRaw("LOWER(CONCAT(first_name, ' ', last_name)) LIKE ?", [$like])
                     ->orWhereRaw('LOWER(email) LIKE ?', [$like])
                     ->orWhereRaw('LOWER(contact_number) LIKE ?', [$like]);
             });
@@ -95,11 +96,14 @@ class RegistrationController extends Controller
                     Registration::query()
                         ->where('event_id', $selectedEventId)
                         ->when($search !== '', function ($exportQuery) use ($search) {
-                            $exportQuery->where(function ($inner) use ($search) {
-                                $inner->where('first_name', 'like', '%' . $search . '%')
-                                    ->orWhere('last_name', 'like', '%' . $search . '%')
-                                    ->orWhere('email', 'like', '%' . $search . '%')
-                                    ->orWhere('contact_number', 'like', '%' . $search . '%');
+                            $normalized = mb_strtolower(trim($search));
+                            $likeExport = '%' . $normalized . '%';
+                            $exportQuery->where(function ($inner) use ($likeExport) {
+                                $inner->whereRaw('LOWER(first_name) LIKE ?', [$likeExport])
+                                    ->orWhereRaw('LOWER(last_name) LIKE ?', [$likeExport])
+                                    ->orWhereRaw("LOWER(CONCAT(first_name, ' ', last_name)) LIKE ?", [$likeExport])
+                                    ->orWhereRaw('LOWER(email) LIKE ?', [$likeExport])
+                                    ->orWhereRaw('LOWER(contact_number) LIKE ?', [$likeExport]);
                             });
                         })
                         ->orderByDesc('created_at')
@@ -221,11 +225,14 @@ class RegistrationController extends Controller
                     Registration::query()
                         ->where('event_id', $selectedEventId)
                         ->when($search !== '', function ($exportQuery) use ($search) {
-                            $exportQuery->where(function ($inner) use ($search) {
-                                $inner->where('first_name', 'like', '%' . $search . '%')
-                                    ->orWhere('last_name', 'like', '%' . $search . '%')
-                                    ->orWhere('email', 'like', '%' . $search . '%')
-                                    ->orWhere('contact_number', 'like', '%' . $search . '%');
+                            $normalized = mb_strtolower(trim($search));
+                            $likeExport = '%' . $normalized . '%';
+                            $exportQuery->where(function ($inner) use ($likeExport) {
+                                $inner->whereRaw('LOWER(first_name) LIKE ?', [$likeExport])
+                                    ->orWhereRaw('LOWER(last_name) LIKE ?', [$likeExport])
+                                    ->orWhereRaw("LOWER(CONCAT(first_name, ' ', last_name)) LIKE ?", [$likeExport])
+                                    ->orWhereRaw('LOWER(email) LIKE ?', [$likeExport])
+                                    ->orWhereRaw('LOWER(contact_number) LIKE ?', [$likeExport]);
                             });
                         })
                         ->orderByDesc('created_at')
