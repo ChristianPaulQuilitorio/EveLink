@@ -20,9 +20,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(UrlGenerator $url): void
     {
-        // Force HTTPS in production (Render)
+        // Force HTTPS in production (Render uses X-Forwarded-Proto header)
         if ($this->app->environment('production')) {
             $url->forceScheme('https');
+            
+            // Ensure APP_URL is HTTPS
+            if (env('APP_URL') && !str_starts_with(env('APP_URL'), 'https://')) {
+                $url->forceRootUrl(str_replace('http://', 'https://', env('APP_URL')));
+            }
         }
     }
 }
