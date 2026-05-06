@@ -46,11 +46,16 @@ RUN echo '<Directory /var/www/html/public>' >> /etc/apache2/apache2.conf && \
 RUN mkdir -p /var/www/html/bootstrap/cache /var/www/html/storage
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --process-timeout=600
+RUN composer install --no-dev --optimize-autoloader --no-interaction --process-timeout=1200
 
-# Install Node dependencies and build assets
+# Install Node.js and npm
 RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
-RUN npm install && npm run build
+
+# Install Node dependencies first
+RUN npm install
+
+# Build assets
+RUN npm run build
 
 # Generate app key if not exists
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
