@@ -45,11 +45,9 @@ RUN echo '<Directory /var/www/html/public>' >> /etc/apache2/apache2.conf && \
 # Create required directories
 RUN mkdir -p /var/www/html/bootstrap/cache /var/www/html/storage
 
-# Install PHP dependencies (skip scripts first)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --process-timeout=1200
-
-# Run Composer scripts after directories are set up
-RUN composer run-script post-autoload-dump || true
+# Install PHP dependencies with maximum timeout for Render
+RUN composer config process-timeout 2400 && \
+    composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Install Node.js and npm
 RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
