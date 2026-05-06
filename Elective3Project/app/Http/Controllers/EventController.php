@@ -19,9 +19,12 @@ class EventController extends Controller
         $eventsQuery = Event::query()
             ->select(['id', 'event_name', 'event_date', 'start_time', 'end_time', 'venue', 'max_slots'])
             ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('event_name', 'like', '%' . $search . '%')
-                        ->orWhere('venue', 'like', '%' . $search . '%');
+                $normalized = mb_strtolower(trim($search));
+                $like = '%' . $normalized . '%';
+
+                $query->where(function ($inner) use ($like) {
+                    $inner->whereRaw('LOWER(event_name) LIKE ?', [$like])
+                        ->orWhereRaw('LOWER(venue) LIKE ?', [$like]);
                 });
             })
             ->withCount('registrations');

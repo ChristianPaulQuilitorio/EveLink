@@ -276,13 +276,13 @@ class AttendanceController extends Controller
             $normalizedSearch = mb_strtolower(trim($search));
             $likeSearch = '%' . $normalizedSearch . '%';
 
-            $registrationsQuery->where(function ($query) use ($search, $likeSearch) {
-                $query->where('first_name', 'like', '%' . $search . '%')
-                    ->orWhere('last_name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%')
-                    ->orWhere('contact_number', 'like', '%' . $search . '%')
-                    ->orWhereRaw("lower(concat(coalesce(first_name, ''), ' ', coalesce(last_name, ''))) like ?", [$likeSearch])
-                    ->orWhereRaw("lower(concat(coalesce(last_name, ''), ' ', coalesce(first_name, ''))) like ?", [$likeSearch]);
+            $registrationsQuery->where(function ($query) use ($likeSearch) {
+                $query->whereRaw('LOWER(first_name) LIKE ?', [$likeSearch])
+                    ->orWhereRaw('LOWER(last_name) LIKE ?', [$likeSearch])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$likeSearch])
+                    ->orWhereRaw('LOWER(contact_number) LIKE ?', [$likeSearch])
+                    ->orWhereRaw("LOWER(concat(coalesce(first_name, ''), ' ', coalesce(last_name, ''))) LIKE ?", [$likeSearch])
+                    ->orWhereRaw("LOWER(concat(coalesce(last_name, ''), ' ', coalesce(first_name, ''))) LIKE ?", [$likeSearch]);
             });
         }
 

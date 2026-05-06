@@ -28,10 +28,13 @@ class AttendeePortalController extends Controller
             ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) < events.max_slots');
 
         if ($search !== '') {
-            $eventsQuery->where(function ($query) use ($search) {
-                $query->where('event_name', 'like', '%' . $search . '%')
-                    ->orWhere('venue', 'like', '%' . $search . '%')
-                    ->orWhere('description', 'like', '%' . $search . '%');
+            $normalized = mb_strtolower(trim($search));
+            $like = '%' . $normalized . '%';
+
+            $eventsQuery->where(function ($query) use ($like) {
+                $query->whereRaw('LOWER(event_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(venue) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(description) LIKE ?', [$like]);
             });
         }
 

@@ -26,9 +26,12 @@ class RegistrationController extends Controller
             ->orderBy('event_date');
 
         if ($eventSearch !== '') {
-            $eventsQuery->where(function ($query) use ($eventSearch) {
-                $query->where('event_name', 'like', '%' . $eventSearch . '%')
-                    ->orWhere('venue', 'like', '%' . $eventSearch . '%');
+            $normalized = mb_strtolower(trim($eventSearch));
+            $like = '%' . $normalized . '%';
+
+            $eventsQuery->where(function ($query) use ($like) {
+                $query->whereRaw('LOWER(event_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(venue) LIKE ?', [$like]);
             });
         }
 
@@ -55,11 +58,14 @@ class RegistrationController extends Controller
         $query = Registration::query()->with('event')->where('event_id', $selectedEventId)->latest();
 
         if ($search !== '') {
-            $query->where(function ($inner) use ($search) {
-                $inner->where('first_name', 'like', '%' . $search . '%')
-                    ->orWhere('last_name', 'like', '%' . $search . '%')
-                    ->orWhere('email', 'like', '%' . $search . '%')
-                    ->orWhere('contact_number', 'like', '%' . $search . '%');
+            $normalized = mb_strtolower(trim($search));
+            $like = '%' . $normalized . '%';
+
+            $query->where(function ($inner) use ($like) {
+                $inner->whereRaw('LOWER(first_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(last_name) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(contact_number) LIKE ?', [$like]);
             });
         }
 
