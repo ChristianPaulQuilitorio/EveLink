@@ -27,19 +27,43 @@
         </div>
         <nav class="menu">
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <span class="menu-icon" title="Dashboard"><img src="{{ asset('icons/dashboard.svg') }}" alt="Dashboard" width="18" height="18" loading="lazy" decoding="async"></span>
+                <span class="menu-icon" title="Dashboard" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h5A1.5 1.5 0 0 1 12 5.5v5A1.5 1.5 0 0 1 10.5 12h-5A1.5 1.5 0 0 1 4 10.5v-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M12.5 5.5A1.5 1.5 0 0 1 14 4h5A1.5 1.5 0 0 1 20.5 5.5v2A1.5 1.5 0 0 1 19 9h-5A1.5 1.5 0 0 1 12.5 7.5v-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M12.5 11.5A1.5 1.5 0 0 1 14 10h5A1.5 1.5 0 0 1 20.5 11.5v7A1.5 1.5 0 0 1 19 20h-5a1.5 1.5 0 0 1-1.5-1.5v-7Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M4 15.5A1.5 1.5 0 0 1 5.5 14h5A1.5 1.5 0 0 1 12 15.5v4A1.5 1.5 0 0 1 10.5 21h-5A1.5 1.5 0 0 1 4 19.5v-4Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <span>Dashboard</span>
             </a>
             <a href="{{ route('events.index') }}" class="{{ request()->routeIs('events.*') ? 'active' : '' }}">
-                <span class="menu-icon" title="Events"><img src="{{ asset('icons/event.svg') }}" alt="Events" width="18" height="18" loading="lazy" decoding="async"></span>
+                <span class="menu-icon" title="Events" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="6" width="16" height="14" rx="3" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M8 4v4M16 4v4M4 10h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                </span>
                 <span>Events</span>
             </a>
             <a href="{{ route('registrations.index') }}" class="{{ request()->routeIs('registrations.*') ? 'active' : '' }}">
-                <span class="menu-icon" title="Registrations"><img src="{{ asset('icons/registrations.svg') }}" alt="Registrations" width="18" height="18" loading="lazy" decoding="async"></span>
+                <span class="menu-icon" title="Registrations" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="9" cy="9" r="3" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M4.5 19c.7-2.7 2.9-4.5 4.5-4.5s3.8 1.8 4.5 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                        <path d="M14.5 8.5h5M14.5 12h5M14.5 15.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                </span>
                 <span>Registrations</span>
             </a>
             <a href="{{ route('attendance.index') }}" class="{{ request()->routeIs('attendance.*') ? 'active' : '' }}">
-                <span class="menu-icon" title="Attendance"><img src="{{ asset('icons/attendance.svg') }}" alt="Attendance" width="18" height="18" loading="lazy" decoding="async"></span>
+                <span class="menu-icon" title="Attendance" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 4.5v2M18 4.5v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                        <rect x="4" y="6.5" width="16" height="13" rx="3" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M8 13.5l2.2 2.2L16 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <span>Attendance</span>
             </a>
         </nav>
