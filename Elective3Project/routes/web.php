@@ -14,8 +14,8 @@ Route::get('/', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.store');
 
 Route::prefix('portal')->name('portal.')->group(function (): void {
-    Route::get('/', [AttendeePortalController::class, 'index'])->name('home');
-    Route::get('/events/{event}', [AttendeePortalController::class, 'show'])->name('events.show');
+    Route::get('/', [AttendeePortalController::class, 'index'])->name('home')->middleware('page.cache:120');
+    Route::get('/events/{event}', [AttendeePortalController::class, 'show'])->name('events.show')->middleware('page.cache:120');
 
     Route::get('/login', [AttendeeAuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AttendeeAuthController::class, 'login'])->name('login.store');
@@ -31,7 +31,7 @@ Route::prefix('portal')->name('portal.')->group(function (): void {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function (): void {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('page.cache:60');
 
     Route::resource('events', EventController::class);
     Route::resource('registrations', RegistrationController::class)->except(['show']);

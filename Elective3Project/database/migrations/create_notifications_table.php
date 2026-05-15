@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('event_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('type'); // e.g., 'event_joined'
+            $table->string('type');
             $table->string('title');
             $table->text('message');
             $table->timestamp('read_at')->nullable();

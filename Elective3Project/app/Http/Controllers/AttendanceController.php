@@ -73,7 +73,6 @@ class AttendanceController extends Controller
             $filename = 'attendance-event-' . $selectedEventId . '.xlsx';
 
             if (! class_exists('PhpOffice\\PhpSpreadsheet\\Spreadsheet', true)) {
-                // Fallback to CSV
                 $filenameCsv = 'attendance-event-' . $selectedEventId . '.csv';
 
                 return response()->streamDownload(function () use ($selectedEventId, $selectedEvent) {
@@ -117,7 +116,6 @@ class AttendanceController extends Controller
 
                     if (! file_exists($pngPath)) {
                         try {
-                            // Try ImageMagick (Imagick) to convert existing SVG to PNG
                             $svgPath = public_path('favicon.svg');
                             if (class_exists('\\Imagick') && file_exists($svgPath)) {
                                 try {
@@ -131,12 +129,10 @@ class AttendanceController extends Controller
                                     $im->clear();
                                     $im->destroy();
                                 } catch (\Throwable $e) {
-                                    // fallback to GD
                                 }
                             }
 
                             if (! file_exists($pngPath) && function_exists('imagecreatetruecolor')) {
-                                // Fallback: generate a higher-resolution PNG via GD
                                 $w = 512; $h = 512;
                                 $img = imagecreatetruecolor($w, $h);
                                 if ($img) {
@@ -154,7 +150,6 @@ class AttendanceController extends Controller
                                 }
                             }
                         } catch (\Throwable $e) {
-                            // Continue without PNG if generation fails
                         }
                     }
 
@@ -222,7 +217,6 @@ class AttendanceController extends Controller
                             }
                         });
 
-                    // Style header row bold
                     try {
                         $sheet->getStyle('A' . $headerRow . ':D' . $headerRow)->getFont()->setBold(true);
                         foreach (['A','B','C','D'] as $col) {
@@ -234,7 +228,6 @@ class AttendanceController extends Controller
                     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
                     $writer->save('php://output');
                 } catch (\Throwable $e) {
-                    // If XLSX generation fails, output as CSV
                     $handle = fopen('php://output', 'w');
                     fputcsv($handle, ['EveLink']);
                     fputcsv($handle, []);

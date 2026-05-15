@@ -95,7 +95,14 @@ class EventController extends Controller
             'max_slots' => ['required', 'integer', 'min:1'],
         ]);
 
-        Event::create($validated);
+        $event = Event::create($validated);
+
+        // Invalidate relevant cached pages
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+        } catch (\Throwable $e) {
+        }
 
         return redirect()->route('events.index')->with('success', 'Event created successfully.');
     }
@@ -125,12 +132,27 @@ class EventController extends Controller
 
         $event->update($validated);
 
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+            (new \App\Services\PageCacheService())->purgeUrl(route('events.show', ['event' => $event->id]));
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+        } catch (\Throwable $e) {
+        }
+
         return redirect()->route('events.index')->with('success', 'Event updated successfully.');
     }
 
     public function destroy(Event $event): RedirectResponse
     {
+        $showUrl = route('events.show', ['event' => $event->id]);
         $event->delete();
+
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+            (new \App\Services\PageCacheService())->purgeUrl($showUrl);
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+        } catch (\Throwable $e) {
+        }
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
     }

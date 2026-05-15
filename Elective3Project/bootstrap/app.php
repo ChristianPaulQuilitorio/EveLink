@@ -12,13 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Trust Render's proxy headers for HTTPS detection
         $middleware->trustProxies(at: '*');
-        
+
         $middleware->alias([
             'role' => EnsureUserRole::class,
+            'page.cache' => \App\Http\Middleware\PageCache::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
     })->create();

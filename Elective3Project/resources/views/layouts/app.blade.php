@@ -189,7 +189,6 @@ if ('serviceWorker' in navigator) {
     });
 })();
 
-// Notification System
 (function () {
     const notificationBell = document.getElementById('notificationBell');
     const notificationDropdown = document.getElementById('notificationDropdown');
@@ -250,26 +249,22 @@ if ('serviceWorker' in navigator) {
             </div>
         `).join('');
 
-        // Add click handlers to notification items
         document.querySelectorAll('.notification-item').forEach(item => {
             item.addEventListener('click', function (e) {
                 if (e.target.classList.contains('mark-read-btn') || e.target.classList.contains('delete-notification-btn')) {
-                    return; // Don't navigate if clicking the read button
+                    return;
                 }
                 const eventId = this.dataset.eventId;
                 const notificationId = this.dataset.notificationId;
-                
-                // Mark as read if unread
+
                 if (this.classList.contains('unread')) {
                     markNotificationAsRead(notificationId);
                 }
-                
-                // Navigate to registrations page with event selected
+
                 window.location.href = `{{ route("registrations.index") }}?event_id=${eventId}`;
             });
         });
 
-        // Add event listeners to mark as read buttons
         document.querySelectorAll('.mark-read-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -371,7 +366,6 @@ if ('serviceWorker' in navigator) {
         return div.innerHTML;
     };
 
-    // Toggle dropdown
     notificationBell.addEventListener('click', function (e) {
         e.stopPropagation();
         const isOpen = notificationDropdown.classList.contains('is-open');
@@ -383,19 +377,16 @@ if ('serviceWorker' in navigator) {
         }
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', function (e) {
         if (!notificationBell.contains(e.target) && !notificationDropdown.contains(e.target)) {
             notificationDropdown.classList.remove('is-open');
         }
     });
 
-    // Prevent dropdown from closing when clicking inside it
     notificationDropdown.addEventListener('click', function (e) {
         e.stopPropagation();
     });
 
-    // Mark all as read button
     markAllReadBtn.addEventListener('click', function () {
         markAllAsRead();
     });
@@ -404,9 +395,7 @@ if ('serviceWorker' in navigator) {
         deleteAllNotifications();
     });
 
-    // Initial fetch
     fetchNotifications();
-    // Refresh every 10 seconds
     setInterval(fetchNotifications, 10000);
 })();
 </script>

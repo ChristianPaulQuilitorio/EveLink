@@ -38,8 +38,6 @@ class AttendeePortalController extends Controller
             });
         }
 
-        // The user portal now only surfaces open upcoming events.
-
         $events = $eventsQuery
             ->orderBy('event_date')
             ->orderBy('start_time')
@@ -120,7 +118,13 @@ class AttendeePortalController extends Controller
             'attendance_status' => 'Pending',
         ]);
 
-        // Create notification for all admins
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+            (new \App\Services\PageCacheService())->purgeUrl(route('portal.events.show', ['event' => $event->id]));
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+        } catch (\Throwable $e) {
+        }
+
         $admins = User::query()->where('role', 'admin')->get();
         foreach ($admins as $admin) {
             Notification::create([
@@ -164,6 +168,13 @@ class AttendeePortalController extends Controller
         }
 
         $registration->delete();
+
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+            (new \App\Services\PageCacheService())->purgeUrl(route('portal.events.show', ['event' => $event->id]));
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+        } catch (\Throwable $e) {
+        }
 
         return redirect()
             ->route('portal.registrations')

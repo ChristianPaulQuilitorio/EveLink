@@ -12,15 +12,11 @@ class AttendeeSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed attendees for each event.
-     */
     public function run(): void
     {
         $events = Event::query()->get();
 
         foreach ($events as $event) {
-            // Create 20-40 attendees per event
             $attendeeCount = random_int(20, 40);
 
             $rows = Registration::factory()

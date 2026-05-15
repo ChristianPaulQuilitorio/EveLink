@@ -9,13 +9,9 @@ use Illuminate\Support\Str;
 
 class EventSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $events = [
-            // Open events (upcoming with available slots)
             [
                 'event_name' => 'Barangay Disaster Preparedness Seminar',
                 'description' => 'A community training on earthquake and flood response protocols.',
@@ -57,7 +53,6 @@ class EventSeeder extends Seeder
                 'target_registrations' => 44,
             ],
 
-            // Full events (upcoming but at max capacity)
             [
                 'event_name' => 'Family Day Sports League Finals',
                 'description' => 'Final rounds of inter-purok basketball and volleyball games.',
@@ -89,7 +84,6 @@ class EventSeeder extends Seeder
                 'target_registrations' => 50,
             ],
 
-            // Concluded events (past dates)
             [
                 'event_name' => 'Barangay Clean-Up Drive',
                 'description' => 'Neighborhood clean-up campaign across priority streets and esteros.',
@@ -120,7 +114,6 @@ class EventSeeder extends Seeder
                 'max_slots' => 100,
                 'target_registrations' => 72,
             ],
-            // Full event (upcoming but at max capacity)
             [
                 'event_name' => 'Family Day Sports League Finals',
                 'description' => 'Final rounds of inter-purok basketball and volleyball games.',
@@ -129,7 +122,7 @@ class EventSeeder extends Seeder
                 'end_time' => '20:00:00',
                 'venue' => 'Barangay Sports Complex, Bacolod City, Negros Occidental',
                 'max_slots' => 60,
-                'target_registrations' => 60,  // Same as max_slots = FULL
+                'target_registrations' => 60,
             ],
             [
                 'event_name' => 'Your Event Name',
@@ -139,7 +132,7 @@ class EventSeeder extends Seeder
                 'end_time' => '14:00:00',
                 'venue' => 'Your Venue',
                 'max_slots' => 100,
-                'target_registrations' => 100,  // Full = matching max_slots
+                'target_registrations' => 100,
             ],
                     ];
 

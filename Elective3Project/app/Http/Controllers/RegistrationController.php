@@ -75,7 +75,6 @@ class RegistrationController extends Controller
             $event = Event::findOrFail($selectedEventId);
 
             if (! class_exists('PhpOffice\\PhpSpreadsheet\\Spreadsheet', true)) {
-                // Fallback: CSV if PhpSpreadsheet isn't installed
                 $filenameCsv = 'registrations-event-' . $selectedEventId . '.csv';
 
                 return response()->streamDownload(function () use ($selectedEventId, $search, $event) {
@@ -126,7 +125,6 @@ class RegistrationController extends Controller
 
             return response()->streamDownload(function () use ($selectedEventId, $search, $event) {
                 try {
-                    // Generate or convert a PNG icon if missing
                     $pngPath = public_path('favicon_export.png');
                     if (! file_exists($pngPath)) {
                         try {
@@ -143,7 +141,6 @@ class RegistrationController extends Controller
                                     $im->clear();
                                     $im->destroy();
                                 } catch (\Throwable $e) {
-                                    // fall through to GD generation
                                 }
                             }
 
@@ -165,14 +162,12 @@ class RegistrationController extends Controller
                                 }
                             }
                         } catch (\Throwable $e) {
-                            // Continue without PNG if generation fails
                         }
                     }
 
                     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
                     $sheet = $spreadsheet->getActiveSheet();
 
-                    // insert logo image
                     if (file_exists($pngPath)) {
                         try {
                             $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
@@ -252,7 +247,6 @@ class RegistrationController extends Controller
                             }
                         });
 
-                    // make header bold and auto-size columns
                     try {
                         $sheet->getStyle('A' . $startHeader . ':E' . $startHeader)->getFont()->setBold(true);
                         foreach (['A','B','C','D','E'] as $col) {
@@ -264,7 +258,6 @@ class RegistrationController extends Controller
                     $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
                     $writer->save('php://output');
                 } catch (\Throwable $e) {
-                    // If XLSX generation fails, fallback to CSV
                     $handle = fopen('php://output', 'w');
                     fputcsv($handle, ['EveLink']);
                     fputcsv($handle, []);
@@ -361,6 +354,13 @@ class RegistrationController extends Controller
 
         Registration::create($validated + ['attendance_status' => 'Pending']);
 
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/registrations');
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+        } catch (\Throwable $e) {
+        }
+
         if ($request->input('dashboard_register') === '1') {
             return redirect()->route('dashboard')
                 ->with('success', 'Attendee registered successfully.');
@@ -407,6 +407,13 @@ class RegistrationController extends Controller
 
         $registration->update($validated);
 
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/registrations');
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+        } catch (\Throwable $e) {
+        }
+
         return redirect()->route('registrations.index', ['event_id' => $registration->event_id])
             ->with('success', 'Registration updated successfully.');
     }
@@ -415,6 +422,13 @@ class RegistrationController extends Controller
     {
         $eventId = $registration->event_id;
         $registration->delete();
+
+        try {
+            (new \App\Services\PageCacheService())->purgePattern('/registrations');
+            (new \App\Services\PageCacheService())->purgePattern('/events');
+            (new \App\Services\PageCacheService())->purgePattern('/portal');
+        } catch (\Throwable $e) {
+        }
 
         return redirect()->route('registrations.index', ['event_id' => $eventId])
             ->with('success', 'Registrant removed successfully.');
