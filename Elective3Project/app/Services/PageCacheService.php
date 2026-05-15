@@ -10,9 +10,24 @@ class PageCacheService
 
     public function purgeUrl(string $url): void
     {
-        $key = 'pagecache:' . sha1($url);
-        Cache::forget($key);
-        $this->removeKeyFromIndex($key);
+        $keys = Cache::get($this->indexKey, []);
+        $kept = [];
+
+        foreach ($keys as $key) {
+            $entry = Cache::get($key);
+            if (! $entry || ! isset($entry['url'])) {
+                continue;
+            }
+
+            if ($entry['url'] === $url) {
+                Cache::forget($key);
+                continue;
+            }
+
+            $kept[] = $key;
+        }
+
+        Cache::put($this->indexKey, array_values($kept), 60 * 60 * 24 * 365);
     }
 
     public function purgePattern(string $pattern): void
@@ -49,10 +64,4 @@ class PageCacheService
         Cache::forget($this->indexKey);
     }
 
-    protected function removeKeyFromIndex(string $key): void
-    {
-        $keys = Cache::get($this->indexKey, []);
-        $filtered = array_values(array_filter($keys, fn($k) => $k !== $key));
-        Cache::put($this->indexKey, $filtered, 60 * 60 * 24 * 365);
-    }
 }

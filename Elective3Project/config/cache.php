@@ -4,7 +4,8 @@ use Illuminate\Support\Str;
 
 return [
 
-    'default' => env('CACHE_STORE', 'database'),
+    // Prefer Redis when available; fall back to the environment's cache store.
+    'default' => env('CACHE_STORE', env('CACHE_DRIVER', 'redis')),
 
     'stores' => [
 

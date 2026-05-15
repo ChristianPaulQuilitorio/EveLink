@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Registration;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -78,31 +81,7 @@ class AttendanceController extends Controller
                 return response()->streamDownload(function () use ($selectedEventId, $selectedEvent) {
                     $handle = fopen('php://output', 'w');
 
-                    fputcsv($handle, ['EveLink']);
-                    fputcsv($handle, []);
-                    fputcsv($handle, ['Event Details']);
-                    fputcsv($handle, ['Event Name', $selectedEvent->event_name]);
-                    fputcsv($handle, ['Date', $selectedEvent->event_date->format('F d, Y')]);
-                    fputcsv($handle, ['Venue', $selectedEvent->venue]);
-                    fputcsv($handle, ['Status', $selectedEvent->status]);
-                    fputcsv($handle, ['Export Date', now()->format('F d, Y H:i:s')]);
-                    fputcsv($handle, []);
-
-                    fputcsv($handle, ['Participant Name', 'Contact Number', 'Email', 'Attendance Status']);
-
-                    Registration::query()
-                        ->where('event_id', $selectedEventId)
-                        ->orderBy('last_name')
-                        ->orderBy('first_name')
-                        ->get()
-                        ->each(function ($registration) use ($handle) {
-                            fputcsv($handle, [
-                                $registration->full_name,
-                                $registration->contact_number,
-                                $registration->email,
-                                $registration->attendance_status,
-                            ]);
-                        });
+                    $this->writeAttendanceCsv($handle, $selectedEventId, $selectedEvent);
 
                     fclose($handle);
                 }, $filenameCsv, [
@@ -115,42 +94,7 @@ class AttendanceController extends Controller
                     $pngPath = public_path('favicon_export.png');
 
                     if (! file_exists($pngPath)) {
-                        try {
-                            $svgPath = public_path('favicon.svg');
-                            if (class_exists('\\Imagick') && file_exists($svgPath)) {
-                                try {
-                                    $im = new \Imagick();
-                                    $im->setBackgroundColor(new \ImagickPixel('transparent'));
-                                    $im->readImage($svgPath);
-                                    $im->setImageFormat('png32');
-                                    $im->setImageResolution(300, 300);
-                                    $im->resizeImage(512, 512, \Imagick::FILTER_LANCZOS, 1);
-                                    $im->writeImage($pngPath);
-                                    $im->clear();
-                                    $im->destroy();
-                                } catch (\Throwable $e) {
-                                }
-                            }
-
-                            if (! file_exists($pngPath) && function_exists('imagecreatetruecolor')) {
-                                $w = 512; $h = 512;
-                                $img = imagecreatetruecolor($w, $h);
-                                if ($img) {
-                                    $bg = sscanf('#2583f6', '#%02x%02x%02x');
-                                    $bgColor = imagecolorallocate($img, $bg[0], $bg[1], $bg[2]);
-                                    $white = imagecolorallocate($img, 255, 255, 255);
-                                    imagefilledrectangle($img, 0, 0, $w, $h, $bgColor);
-                                    $text = 'EL';
-                                    $font = 5;
-                                    $textW = imagefontwidth($font) * strlen($text);
-                                    $textH = imagefontheight($font);
-                                    imagestring($img, $font, (int)(($w - $textW) / 2), (int)(($h - $textH) / 2), $text, $white);
-                                    imagepng($img, $pngPath);
-                                    imagedestroy($img);
-                                }
-                            }
-                        } catch (\Throwable $e) {
-                        }
+                        $this->createExportBadge($pngPath);
                     }
 
                     $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -174,12 +118,7 @@ class AttendanceController extends Controller
                     $sheet->setCellValue('B' . $row, $selectedEvent->event_name);
                     $row++;
                     $sheet->setCellValue('A' . $row, 'Date');
-                    try {
-                        $sheet->setCellValue('B' . $row, \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($selectedEvent->event_date->toDateTime()));
-                        $sheet->getStyle('B' . $row)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_LONG);
-                    } catch (\Throwable $e) {
-                        $sheet->setCellValue('B' . $row, $selectedEvent->event_date->format('F d, Y'));
-                    }
+                    $sheet->setCellValue('B' . $row, $this->formatDateValue($selectedEvent->event_date));
                     $row++;
                     $sheet->setCellValue('A' . $row, 'Venue');
                     $sheet->setCellValue('B' . $row, $selectedEvent->venue);
@@ -188,12 +127,7 @@ class AttendanceController extends Controller
                     $sheet->setCellValue('B' . $row, $selectedEvent->status);
                     $row++;
                     $sheet->setCellValue('A' . $row, 'Export Date');
-                    try {
-                        $sheet->setCellValue('B' . $row, \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel(now()->toDateTime()));
-                        $sheet->getStyle('B' . $row)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DATETIME);
-                    } catch (\Throwable $e) {
-                        $sheet->setCellValue('B' . $row, now()->format('F d, Y H:i:s'));
-                    }
+                    $sheet->setCellValue('B' . $row, now()->format('F d, Y H:i:s'));
 
                     $row += 2;
                     $headerRow = $row;
@@ -229,30 +163,7 @@ class AttendanceController extends Controller
                     $writer->save('php://output');
                 } catch (\Throwable $e) {
                     $handle = fopen('php://output', 'w');
-                    fputcsv($handle, ['EveLink']);
-                    fputcsv($handle, []);
-                    fputcsv($handle, ['Event Details']);
-                    fputcsv($handle, ['Event Name', $selectedEvent->event_name]);
-                    fputcsv($handle, ['Date', $selectedEvent->event_date->format('F d, Y')]);
-                    fputcsv($handle, ['Venue', $selectedEvent->venue]);
-                    fputcsv($handle, ['Status', $selectedEvent->status]);
-                    fputcsv($handle, ['Export Date', now()->format('F d, Y H:i:s')]);
-                    fputcsv($handle, []);
-                    fputcsv($handle, ['Participant Name', 'Contact Number', 'Email', 'Attendance Status']);
-                    Registration::query()
-                        ->where('event_id', $selectedEventId)
-                        ->orderBy('last_name')
-                        ->orderBy('first_name')
-                        ->chunk(100, function ($registrations) use ($handle) {
-                            foreach ($registrations as $registration) {
-                                fputcsv($handle, [
-                                    $registration->full_name,
-                                    $registration->contact_number,
-                                    $registration->email,
-                                    $registration->attendance_status,
-                                ]);
-                            }
-                        });
+                    $this->writeAttendanceCsv($handle, $selectedEventId, $selectedEvent);
                     fclose($handle);
                 }
             }, $filename, [
@@ -288,15 +199,18 @@ class AttendanceController extends Controller
         $summary = ['total' => 0, 'Present' => 0, 'Absent' => 0, 'Pending' => 0];
 
         if ($selectedEvent) {
-            $allRegistrations = Registration::query()
+            $statusCounts = Registration::query()
+                ->select('attendance_status', DB::raw('COUNT(*) as aggregate'))
                 ->where('event_id', $selectedEvent->id)
-                ->get();
+                ->groupBy('attendance_status')
+                ->pluck('aggregate', 'attendance_status')
+                ->all();
 
             $summary = [
-                'total' => $allRegistrations->count(),
-                'Present' => $allRegistrations->where('attendance_status', 'Present')->count(),
-                'Absent' => $allRegistrations->where('attendance_status', 'Absent')->count(),
-                'Pending' => $allRegistrations->where('attendance_status', 'Pending')->count(),
+                'total' => array_sum($statusCounts),
+                'Present' => (int) ($statusCounts['Present'] ?? 0),
+                'Absent' => (int) ($statusCounts['Absent'] ?? 0),
+                'Pending' => (int) ($statusCounts['Pending'] ?? 0),
             ];
         }
 
@@ -325,5 +239,83 @@ class AttendanceController extends Controller
         ]);
 
         return back()->with('success', 'Attendance updated.');
+    }
+
+    protected function writeAttendanceCsv($handle, int $selectedEventId, Event $selectedEvent): void
+    {
+        fputcsv($handle, ['EveLink']);
+        fputcsv($handle, []);
+        fputcsv($handle, ['Event Details']);
+        fputcsv($handle, ['Event Name', $selectedEvent->event_name]);
+        fputcsv($handle, ['Date', $this->formatDateLabel($selectedEvent->event_date)]);
+        fputcsv($handle, ['Venue', $selectedEvent->venue]);
+        fputcsv($handle, ['Status', $selectedEvent->status]);
+        fputcsv($handle, ['Export Date', now()->format('F d, Y H:i:s')]);
+        fputcsv($handle, []);
+
+        fputcsv($handle, ['Participant Name', 'Contact Number', 'Email', 'Attendance Status']);
+
+        Registration::query()
+            ->where('event_id', $selectedEventId)
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->chunk(100, function ($registrations) use ($handle) {
+                foreach ($registrations as $registration) {
+                    fputcsv($handle, [
+                        $registration->full_name,
+                        $registration->contact_number,
+                        $registration->email,
+                        $registration->attendance_status,
+                    ]);
+                }
+            });
+    }
+
+    protected function createExportBadge(string $pngPath): void
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return;
+        }
+
+        $width = 512;
+        $height = 512;
+        $image = imagecreatetruecolor($width, $height);
+
+        if (! $image) {
+            return;
+        }
+
+        $background = sscanf('#2583f6', '#%02x%02x%02x');
+        $backgroundColor = imagecolorallocate($image, $background[0], $background[1], $background[2]);
+        $white = imagecolorallocate($image, 255, 255, 255);
+
+        imagefilledrectangle($image, 0, 0, $width, $height, $backgroundColor);
+
+        $text = 'EL';
+        $font = 5;
+        $textWidth = imagefontwidth($font) * strlen($text);
+        $textHeight = imagefontheight($font);
+
+        imagestring($image, $font, (int) (($width - $textWidth) / 2), (int) (($height - $textHeight) / 2), $text, $white);
+        imagepng($image, $pngPath);
+        imagedestroy($image);
+    }
+
+    protected function formatDateLabel(DateTimeInterface|string|null $date): string
+    {
+        if ($date instanceof DateTimeInterface) {
+            return $date->format('F d, Y');
+        }
+
+        if (blank($date)) {
+            return '';
+        }
+
+        return DateTimeImmutable::createFromFormat('Y-m-d', (string) $date)?->format('F d, Y') ?? (string) $date;
+    }
+
+    protected function formatDateValue(DateTimeInterface|string|null $date): string
+    {
+        return $this->formatDateLabel($date);
     }
 }

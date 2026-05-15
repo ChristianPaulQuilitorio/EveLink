@@ -34,7 +34,11 @@ class Event extends Model
 
     public function getRegisteredCountAttribute(): int
     {
-        return (int) ($this->registrations_count ?? $this->registrations()->count());
+        if (! array_key_exists('registrations_count', $this->attributes)) {
+            $this->loadCount('registrations');
+        }
+
+        return (int) ($this->attributes['registrations_count'] ?? 0);
     }
 
     public function getRemainingSlotsAttribute(): int

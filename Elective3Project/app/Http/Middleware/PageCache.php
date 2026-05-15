@@ -22,7 +22,7 @@ class PageCache
             return $next($request);
         }
 
-        $key = 'pagecache:' . sha1($request->fullUrl());
+        $key = 'pagecache:' . sha1($this->cacheScope($request) . '|' . $request->fullUrl());
 
         if (Cache::has($key)) {
             $cached = Cache::get($key);
@@ -34,6 +34,7 @@ class PageCache
         if ($response->getStatusCode() === 200 && $this->isCacheableResponse($response)) {
             $store = [
                 'url' => $request->fullUrl(),
+                'scope' => $this->cacheScope($request),
                 'content' => $response->getContent(),
                 'status' => $response->getStatusCode(),
                 'headers' => $this->filterHeaders($response->headers->all()),
@@ -74,5 +75,14 @@ class PageCache
             $out[$k] = is_array($v) && count($v) === 1 ? $v[0] : $v;
         }
         return $out;
+    }
+
+    protected function cacheScope(Request $request): string
+    {
+        if (! $request->user()) {
+            return 'guest';
+        }
+
+        return 'user:' . $request->user()->getAuthIdentifier() . ':role:' . (string) ($request->user()->role ?? 'user');
     }
 }

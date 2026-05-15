@@ -9,6 +9,8 @@
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     @if(app()->environment('production'))
+        <link rel="preload" as="style" href="{{ Vite::asset('resources/css/app.css') }}">
+        <link rel="preload" as="script" href="{{ Vite::asset('resources/js/app.js') }}">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @else
         <link rel="stylesheet" href="/css/app.css">

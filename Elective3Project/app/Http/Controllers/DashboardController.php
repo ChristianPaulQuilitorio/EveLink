@@ -52,9 +52,8 @@ class DashboardController extends Controller
             ->withCount('registrations')
             ->whereDate('event_date', '>=', $today)
             ->orderBy('event_date')
-            ->get()
-            ->filter(fn (Event $event) => $event->canAcceptRegistration())
-            ->values();
+            ->whereRaw('(select count(*) from registrations where registrations.event_id = events.id) < events.max_slots')
+            ->get();
 
         return view('dashboard.index', compact(
             'totalEvents',
