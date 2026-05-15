@@ -26,11 +26,11 @@ class NotificationController extends Controller
                 'type' => $notif->type,
                 'title' => $notif->title,
                 'message' => $notif->message,
-                'event' => [
+                'event' => $notif->event ? [
                     'id' => $notif->event->id,
                     'name' => $notif->event->event_name,
                     'date' => $notif->event->event_date->format('M d, Y'),
-                ],
+                ] : null,
                 'read_at' => $notif->read_at,
                 'created_at' => $notif->created_at->diffForHumans(),
                 'is_read' => $notif->isRead(),

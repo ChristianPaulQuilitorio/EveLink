@@ -210,6 +210,10 @@ if ('serviceWorker' in navigator) {
                 }
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+
             const data = await response.json();
             renderNotifications(data);
         } catch (error) {
@@ -233,14 +237,19 @@ if ('serviceWorker' in navigator) {
             return;
         }
 
-        notificationList.innerHTML = notifications.map(notif => `
-            <div class="notification-item ${notif.is_read ? 'read' : 'unread'}" data-event-id="${notif.event.id}" data-notification-id="${notif.id}">
+        notificationList.innerHTML = notifications.map(notif => {
+            const eventId = notif.event?.id || '';
+            const eventName = notif.event?.name || 'Event deleted';
+            const eventDate = notif.event?.date || '';
+            
+            return `
+            <div class="notification-item ${notif.is_read ? 'read' : 'unread'}" data-event-id="${eventId}" data-notification-id="${notif.id}">
                 <div class="notification-content">
                     <div class="notification-title">${escapeHtml(notif.title)}</div>
                     <div class="notification-message">${escapeHtml(notif.message)}</div>
                     <div class="notification-meta">
-                        <span class="event-name">${escapeHtml(notif.event.name)}</span>
-                        <span class="event-date">${escapeHtml(notif.event.date)}</span>
+                        <span class="event-name">${escapeHtml(eventName)}</span>
+                        ${eventDate ? `<span class="event-date">${escapeHtml(eventDate)}</span>` : ''}
                     </div>
                     <div class="notification-time">${escapeHtml(notif.created_at)}</div>
                 </div>
@@ -249,7 +258,8 @@ if ('serviceWorker' in navigator) {
                     <button type="button" class="delete-notification-btn" data-notification-id="${notif.id}" aria-label="Delete notification">✕</button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         document.querySelectorAll('.notification-item').forEach(item => {
             item.addEventListener('click', function (e) {
@@ -258,6 +268,10 @@ if ('serviceWorker' in navigator) {
                 }
                 const eventId = this.dataset.eventId;
                 const notificationId = this.dataset.notificationId;
+
+                if (!eventId) {
+                    return; // Don't navigate if event was deleted
+                }
 
                 if (this.classList.contains('unread')) {
                     markNotificationAsRead(notificationId);

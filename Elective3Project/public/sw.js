@@ -61,7 +61,11 @@ const networkFirst = async (request) => {
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
+    caches.open(CACHE_NAME).then(cache => {
+      return Promise.allSettled(
+        CORE_ASSETS.map(asset => cache.add(asset))
+      ).then(() => self.skipWaiting());
+    })
   );
 });
 
